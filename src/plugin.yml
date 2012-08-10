@@ -1,0 +1,10 @@
+name: AutoTool
+main: com.WildAmazing.marinating.AutoTool.AutoTool
+version: 1.4
+commands:
+   autotool:
+      description: Configure AutoTool.
+      usage:
+           /autotool [on/off]
+      aliases: 
+           - at
