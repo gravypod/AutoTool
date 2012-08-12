@@ -1,6 +1,7 @@
 name: AutoTool
 main: com.WildAmazing.marinating.AutoTool.AutoTool
-version: 1.4
+author: [Gravypod,marinating]
+version: 1.5
 commands:
    autotool:
       description: Auto swap items into your hotbar!

@@ -15,9 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class AutoTool extends JavaPlugin {
-	private final AutoToolPlayerListener playerListener = new AutoToolPlayerListener(
-			this);
-	private final HashMap<Player, Boolean> debugees = new HashMap<Player, Boolean>();
+	
 	public static Logger log = Logger.getLogger("Minecraft");
 	static String mainDirectory = "plugins/AutoTool";
 	public HashMap<Player, AutoPlayer> ACTIVATED = new HashMap<Player, AutoPlayer>();
@@ -28,58 +26,41 @@ public class AutoTool extends JavaPlugin {
 	private ArrayList<Material> PICKAXE;
 	private ArrayList<Material> SHOVEL;
 	private ArrayList<Material> AXE;
-	static Properties prop = new Properties();
+	static Properties prop = null;
 	public boolean ALWAYSON = false;
 
 	public void onEnable() {
+
 		long start = System.currentTimeMillis();
-		this.PICKAXE = new ArrayList<Material>();
-		this.SHOVEL = new ArrayList<Material>();
-		this.AXE = new ArrayList<Material>();
-		this.pickaxes = new ArrayList<Material>();
-		this.shovels = new ArrayList<Material>();
-		this.axes = new ArrayList<Material>();
-		this.pickaxes.add(Material.WOOD_PICKAXE);
-		this.pickaxes.add(Material.STONE_PICKAXE);
-		this.pickaxes.add(Material.IRON_PICKAXE);
-		this.pickaxes.add(Material.GOLD_PICKAXE);
-		this.pickaxes.add(Material.DIAMOND_PICKAXE);
-		this.shovels.add(Material.WOOD_SPADE);
-		this.shovels.add(Material.STONE_SPADE);
-		this.shovels.add(Material.IRON_SPADE);
-		this.shovels.add(Material.GOLD_SPADE);
-		this.shovels.add(Material.DIAMOND_SPADE);
-		this.axes.add(Material.WOOD_AXE);
-		this.axes.add(Material.STONE_AXE);
-		this.axes.add(Material.IRON_AXE);
-		this.axes.add(Material.GOLD_AXE);
-		this.axes.add(Material.DIAMOND_AXE);
+		
+		prop =  new Properties();
+		PICKAXE = new ArrayList<Material>();
+		SHOVEL = new ArrayList<Material>();
+		AXE = new ArrayList<Material>();
+		pickaxes = new ArrayList<Material>();
+		shovels = new ArrayList<Material>();
+		axes = new ArrayList<Material>();
+
 		
 		new File(mainDirectory).mkdir();
 		
 		if (!CONFIG.exists())
-			try {
-				CONFIG.createNewFile();
-				FileOutputStream out = new FileOutputStream(CONFIG);
-				prop.put("Pickaxe-items", "STONE,IRON_ORE,GOLD_ORE,REDSTONE_ORE,COAL_ORE,DIAMOND_ORE,LAPIS_ORE,COBBLESTONE,MOSSY_COBBLESTONE,NETHERRACK,OBSIDIAN,IRON_BLOCK,GOLD_BLOCK,DIAMOND_BLOCK,GLOWSTONE,LAPIS_BLOCK,SANDSTONE,BRICK,STEP,BRICK_STAIRS,COBBLESTONE_STAIRS,");
-
-				prop.put("Shovel-items", "DIRT,GRASS,GRAVEL,SAND,SNOW_BLOCK,CLAY");
-				prop.put("Axe-items", "LOG,WOOD,WOOD_DOOR");
-				prop.put("On-by-default?", "false");
-				prop.store(out, "All items must be seperated by an ',' and may either be an Item id or the item name in caps");
-				out.flush();
-				out.close();
-				log.info("[AutoTool] New file created.");
-			} catch (IOException ex) {
-				log.warning("[AutoTool] File creation error: " + ex.getMessage());
-			}
-		else {
+			
+			if (!stupConfig()) {
+				
+				log.info("[AutoTool] Could not load config, disabling.");
+				
+				return;
+				
+			} else {
+				
 			log.info("[AutoTool] Detected existing config file and loading.");
+			
 		}
 		
 		loadProcedure();
 		
-		getServer().getPluginManager().registerEvents(this.playerListener, this);
+		getServer().getPluginManager().registerEvents(new AutoToolPlayerListener(this), this);
 		
 		getCommand("autotool").setExecutor(new Commands(this));
 		
@@ -88,9 +69,20 @@ public class AutoTool extends JavaPlugin {
 
 	public void loadProcedure() {
 		try {
+			
 			FileInputStream in = new FileInputStream(CONFIG);
 			prop.load(in);
 			Material materialInConfig = null;
+			
+			for (String configItem : ((String) prop.get("Pickaxes")).split(",")) {
+				
+				materialInConfig = Material.getMaterial(configItem);
+				
+				if (materialInConfig == null)
+					materialInConfig = Material.getMaterial(Integer.parseInt(configItem));
+				
+				pickaxes.add(materialInConfig);
+			}
 			
 			for (String configItem : ((String) prop.get("Pickaxe-items")).split(",")) {
 				
@@ -99,9 +91,20 @@ public class AutoTool extends JavaPlugin {
 				if (materialInConfig == null)
 					materialInConfig = Material.getMaterial(Integer.parseInt(configItem));
 				
-				this.PICKAXE.add(materialInConfig);
+				PICKAXE.add(materialInConfig);
 				
 			}
+			
+			for (String configItem : ((String) prop.get("Axes")).split(",")) {
+				
+				materialInConfig = Material.getMaterial(configItem);
+				
+				if (materialInConfig == null)
+					materialInConfig = Material.getMaterial(Integer.parseInt(configItem));
+				
+				axes.add(materialInConfig);
+			}
+			
 			for (String configItem : ((String) prop.get("Axe-items")).split(",")) {
 				
 				materialInConfig = Material.getMaterial(configItem);
@@ -109,9 +112,20 @@ public class AutoTool extends JavaPlugin {
 				if (materialInConfig == null)
 					materialInConfig = Material.getMaterial(Integer.parseInt(configItem));
 				
-				this.AXE.add(materialInConfig);
+				AXE.add(materialInConfig);
 				
 			}
+			
+			for (String configItem : ((String) prop.get("Shovels")).split(",")) {
+				
+				materialInConfig = Material.getMaterial(configItem);
+				
+				if (materialInConfig == null)
+					materialInConfig = Material.getMaterial(Integer.parseInt(configItem));
+				
+				shovels.add(materialInConfig);
+			}
+			
 			for (String configItem : ((String) prop.get("Shovel-items")).split(",")) {
 				
 				materialInConfig = Material.getMaterial(configItem);
@@ -119,61 +133,82 @@ public class AutoTool extends JavaPlugin {
 				if (materialInConfig == null)
 					materialInConfig = Material.getMaterial(Integer.parseInt(configItem));
 				
-				this.SHOVEL.add(materialInConfig);
+				SHOVEL.add(materialInConfig);
 			}
 			
-			this.ALWAYSON = Boolean.parseBoolean(((String) prop.get("On-by-default?")).toLowerCase());
+			ALWAYSON = Boolean.parseBoolean(((String) prop.get("On-by-default?")).toLowerCase());
 			
 			in.close();
+			
 		} catch (Exception e) {
 			log.severe("[AutoTool] Loading error: " + e.getMessage());
 		}
 	}
 
 	public void onDisable() {
-		this.ACTIVATED.clear();
-		this.pickaxes.clear();
-		this.shovels.clear();
-		this.axes.clear();
-		this.PICKAXE.clear();
-		this.SHOVEL.clear();
-		this.AXE.clear();
+		
+		ACTIVATED.clear();
+		pickaxes.clear();
+		shovels.clear();
+		axes.clear();
+		PICKAXE.clear();
+		SHOVEL.clear();
+		AXE.clear();
 		log.info("[AutoTool] Closed and unloaded.");
+		
 	}
 
 
-	public boolean isDebugging(Player player) {
-		if (this.debugees.containsKey(player)) {
-			return ((Boolean) this.debugees.get(player)).booleanValue();
+	public boolean stupConfig() {
+		
+		try {
+			
+			CONFIG.createNewFile();
+			FileOutputStream out = new FileOutputStream(CONFIG);
+			prop.put("Pickaxes", "WOOD_PICKAXE,STONE_PICKAXE,IRON_PICKAXE,GOLD_PICKAXE,DIAMOND_PICKAXE");
+			prop.put("Pickaxe-items", "STONE,IRON_ORE,GOLD_ORE,REDSTONE_ORE,COAL_ORE,DIAMOND_ORE,LAPIS_ORE,COBBLESTONE,MOSSY_COBBLESTONE,NETHERRACK,OBSIDIAN,IRON_BLOCK,GOLD_BLOCK,DIAMOND_BLOCK,GLOWSTONE,LAPIS_BLOCK,SANDSTONE,BRICK,STEP,BRICK_STAIRS,COBBLESTONE_STAIRS,");
+
+			prop.put("Shovels", "WOOD_SPADE,STONE_SPADE,IRON_SPADE,GOLD_SPADE,DIAMOND_SPADE");
+			prop.put("Shovel-items", "DIRT,GRASS,GRAVEL,SAND,SNOW_BLOCK,CLAY");
+			prop.put("Axes", "WOOD_AXE,STONE_AXE,IRON_AXE,GOLD_AXE,DIAMOND_AXE");
+			prop.put("Axe-items", "LOG,WOOD,WOOD_DOOR");
+			prop.put("On-by-default?", "false");
+			prop.store(out, "All items must be seperated by an ',' and may either be an Item id or the item name in caps");
+			out.flush();
+			out.close();
+			log.info("[AutoTool] New file created.");
+			return true;
+			
+		} catch (IOException ex) {
+			
+			log.warning("[AutoTool] File creation error: " + ex.getMessage());
+			return false;
+			
 		}
-		return false;
+		
 	}
-
-	public void setDebugging(Player player, boolean value) {
-		this.debugees.put(player, Boolean.valueOf(value));
-	}
-
+	
 	public boolean isPickaxe(Block block) {
-		return this.PICKAXE.contains(block.getType());
+		return PICKAXE.contains(block.getType());
 	}
 
 	public boolean isShovel(Block block) {
-		return this.SHOVEL.contains(block.getType());
+		return SHOVEL.contains(block.getType());
 	}
 
 	public boolean isAxe(Block block) {
-		return this.AXE.contains(block.getType());
+		return AXE.contains(block.getType());
 	}
 
 	public ArrayList<Material> getAxes() {
-		return this.axes;
+		return axes;
 	}
 
 	public ArrayList<Material> getPickaxes() {
-		return this.pickaxes;
+		return pickaxes;
 	}
 
 	public ArrayList<Material> getShovels() {
-		return this.shovels;
+		return shovels;
 	}
 }
