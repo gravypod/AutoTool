@@ -3,8 +3,8 @@ main: com.WildAmazing.marinating.AutoTool.AutoTool
 version: 1.4
 commands:
    autotool:
-      description: Configure AutoTool.
+      description: Auto swap items into your hotbar!
       usage:
            /autotool [on/off]
-      aliases: 
-           - at
+      aliases:
+        - at

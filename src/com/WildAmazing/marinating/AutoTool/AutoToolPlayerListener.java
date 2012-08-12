@@ -1,6 +1,7 @@
 package com.WildAmazing.marinating.AutoTool;
 
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -12,6 +13,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 public class AutoToolPlayerListener implements Listener {
+	
 	private AutoTool plugin;
 
 	public AutoToolPlayerListener(AutoTool p) {
@@ -19,80 +21,99 @@ public class AutoToolPlayerListener implements Listener {
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onPlayerJoin(PlayerJoinEvent e) {
-		Player p = e.getPlayer();
-		if (!this.plugin.ACTIVATED.containsKey(p))
-			this.plugin.ACTIVATED.put(p, new AP(p, this.plugin.ALWAYSON));
+	public void onPlayerJoin(PlayerJoinEvent event) {
+		
+		Player player = event.getPlayer();
+		
+		if (player.getName().startsWith("["))
+			return;
+		
+		if (!plugin.ACTIVATED.containsKey(player)) {
+			
+			plugin.ACTIVATED.put(player, new AutoPlayer(player, plugin.ALWAYSON));
+			
+		}
+		
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onPlayerInteract(PlayerInteractEvent e) {
+	public void onPlayerInteract(PlayerInteractEvent event) {
 		
-		Player p = e.getPlayer();
+		Player player = event.getPlayer();
 
-		if (p.getItemInHand().getType().toString().toLowerCase().contains("sword"))
+		if (player.getItemInHand().getType().name().toLowerCase().contains("sword"))
 			return;
 		
-		if (e.getClickedBlock() != null)
+		if (event.getClickedBlock() != null)
 			try {
-				AP a = (AP) this.plugin.ACTIVATED.get(p);
-				if (a.getAuto()) {
-					if (a.getSubAuto()) {
-						if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-							a.setSubAuto(false);
+				Material itemInHand = player.getItemInHand().getType();
+				AutoPlayer autoPlayer = (AutoPlayer) plugin.ACTIVATED.get(player);
+				if (autoPlayer.getAuto()) {
+					
+					if (autoPlayer.getSubAuto()) {
+						
+						if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+							autoPlayer.setSubAuto(false);
 							return;
 						}
-						Inventory i = p.getInventory();
-						int index = -99;
 						
-						if ((this.plugin.isPickaxe(e.getClickedBlock())) && (!this.plugin.getPickaxes().contains(p.getItemInHand().getType()))) {
-							for (Material m : this.plugin.getPickaxes()) {
-								if (i.contains(m))
-									index = i.first(m);
-							}
-						} else if ((this.plugin.isShovel(e.getClickedBlock())) && (!this.plugin.getShovels().contains(p.getItemInHand().getType()))) {
-							for (Material m : this.plugin.getShovels()) {
-								if (i.contains(m))
-									index = i.first(m);
-							}
-						} else if ((this.plugin.isAxe(e.getClickedBlock())) && (!this.plugin.getAxes().contains(p.getItemInHand().getType()))) {
-								for (Material m : this.plugin.getAxes()) {
-									if (i.contains(m)) {
-										index = i.first(m);
-									}
+						Inventory playerInventory = player.getInventory();
+						Block clickedBlock = event.getClickedBlock();
+						
+						
+						if ((plugin.isPickaxe(clickedBlock)) && (!plugin.getPickaxes().contains(itemInHand))) {
+			
+							for (Material m : plugin.getPickaxes()) {
+								if (playerInventory.contains(m)) {
+									setItem(player, playerInventory.first(m));
 								}
-						}
-						
-
-						if (index == -99)
-							return;
-						
-						if (p.getItemInHand().getType() == Material.AIR) {
+							}
 							
-							p.setItemInHand(i.getItem(index));
-							i.setItem(index, null);
+						} else if ((plugin.isShovel(clickedBlock)) && (!plugin.getShovels().contains(itemInHand))) {
+			
+							for (Material m : plugin.getShovels()) {
+								if (playerInventory.contains(m)) {
+									setItem(player, playerInventory.first(m));
+								}
+							}
 							
-						} else {
-							
-							ItemStack temp = i.getItem(index);
-							i.setItem(index, p.getItemInHand());
-							p.setItemInHand(temp);
-							
+						} else if ((plugin.isAxe(clickedBlock)) && (!plugin.getAxes().contains(itemInHand))) {
+	
+							for (Material m : plugin.getAxes()) {
+								if (playerInventory.contains(m)) {
+									setItem(player, playerInventory.first(m));
+								}
+							}
 						}
 						
 					}
 					
-					if ((p.getItemInHand() != null) && ((this.plugin.getPickaxes().contains(p.getItemInHand().getType())) || (this.plugin.getAxes().contains(p.getItemInHand().getType())) || (this.plugin.getShovels().contains(p.getItemInHand().getType())))) {
-						a.setSubAuto(true);
-					}
+					autoPlayer.setSubAuto(true);
 					
-					if (e.getAction() == Action.LEFT_CLICK_BLOCK)
-						a.setSubAuto(true);
 				}
 				
 			} catch (NullPointerException er) {
-				this.plugin.ACTIVATED.put(p, new AP(p, this.plugin.ALWAYSON));
+				plugin.ACTIVATED.put(player, new AutoPlayer(player, plugin.ALWAYSON));
 			}
+		
+	}
+	
+	public void setItem(Player player, int index) {
+		
+		Inventory playerInventory = player.getInventory();
+		
+		if (player.getItemInHand().getType() == Material.AIR) {
+			
+			player.setItemInHand(playerInventory.getItem(index));
+			playerInventory.setItem(index, null);
+			
+		} else {
+			
+			ItemStack temp = playerInventory.getItem(index);
+			playerInventory.setItem(index, player.getItemInHand());
+			player.setItemInHand(temp);
+			
+		}
 		
 	}
 }
