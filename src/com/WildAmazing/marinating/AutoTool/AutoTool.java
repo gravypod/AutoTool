@@ -29,6 +29,7 @@ public class AutoTool extends JavaPlugin {
 	static Properties prop = null;
 	public boolean ALWAYSON = false;
 
+	@Override
 	public void onEnable() {
 
 		long start = System.currentTimeMillis();
@@ -167,7 +168,6 @@ public class AutoTool extends JavaPlugin {
 			FileOutputStream out = new FileOutputStream(CONFIG);
 			prop.put("Pickaxes", "WOOD_PICKAXE,STONE_PICKAXE,IRON_PICKAXE,GOLD_PICKAXE,DIAMOND_PICKAXE");
 			prop.put("Pickaxe-items", "STONE,IRON_ORE,GOLD_ORE,REDSTONE_ORE,COAL_ORE,DIAMOND_ORE,LAPIS_ORE,COBBLESTONE,MOSSY_COBBLESTONE,NETHERRACK,OBSIDIAN,IRON_BLOCK,GOLD_BLOCK,DIAMOND_BLOCK,GLOWSTONE,LAPIS_BLOCK,SANDSTONE,BRICK,STEP,BRICK_STAIRS,COBBLESTONE_STAIRS,");
-
 			prop.put("Shovels", "WOOD_SPADE,STONE_SPADE,IRON_SPADE,GOLD_SPADE,DIAMOND_SPADE");
 			prop.put("Shovel-items", "DIRT,GRASS,GRAVEL,SAND,SNOW_BLOCK,CLAY");
 			prop.put("Axes", "WOOD_AXE,STONE_AXE,IRON_AXE,GOLD_AXE,DIAMOND_AXE");
