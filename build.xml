@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="AutoTool" default="makejar" basedir=".">
+<project name="AutoTool" default="makejar" basedir="/">
   <target name ="makejar" description="Create a jar for the AutoTool project">
-    <jar jarfile="../lib/AutoTool.jar" includes="**" basedir="bin">
+  <mkdir dir="/lib/"/>
+    <jar jarfile="/lib/AutoTool.jar" includes="**" basedir="bin">
 	</jar>
   </target>
 </project>
