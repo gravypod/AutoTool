@@ -17,31 +17,41 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class AutoTool extends JavaPlugin {
 	
 	public static Logger log = Logger.getLogger("Minecraft");
+	
 	static String mainDirectory = "plugins/AutoTool";
+	
 	public HashMap<Player, AutoPlayer> ACTIVATED = new HashMap<Player, AutoPlayer>();
+	
 	public static File CONFIG = new File(mainDirectory + File.separator + "AutoTool.txt");
+	
 	private ArrayList<Material> pickaxes;
+	
 	private ArrayList<Material> shovels;
+	
 	private ArrayList<Material> axes;
+	
 	private ArrayList<Material> PICKAXE;
+	
 	private ArrayList<Material> SHOVEL;
+	
 	private ArrayList<Material> AXE;
+	
 	static Properties prop = null;
+	
 	public boolean ALWAYSON = false;
-
+	
 	@Override
 	public void onEnable() {
-
+	
 		long start = System.currentTimeMillis();
 		
-		prop =  new Properties();
+		prop = new Properties();
 		PICKAXE = new ArrayList<Material>();
 		SHOVEL = new ArrayList<Material>();
 		AXE = new ArrayList<Material>();
 		pickaxes = new ArrayList<Material>();
 		shovels = new ArrayList<Material>();
 		axes = new ArrayList<Material>();
-
 		
 		new File(mainDirectory).mkdir();
 		
@@ -55,9 +65,9 @@ public class AutoTool extends JavaPlugin {
 				
 			} else {
 				
-			log.info("[AutoTool] Detected existing config file and loading.");
-			
-		}
+				log.info("[AutoTool] Detected existing config file and loading.");
+				
+			}
 		
 		loadProcedure();
 		
@@ -67,12 +77,19 @@ public class AutoTool extends JavaPlugin {
 		
 		log.info("[AutoTool] By marinating loaded in " + (System.currentTimeMillis() - start) / 1000.0D + " seconds.");
 	}
-
+	
 	public void loadProcedure() {
+	
+		FileInputStream in = null;
+		
 		try {
 			
-			FileInputStream in = new FileInputStream(CONFIG);
+			in = new FileInputStream(CONFIG);
 			prop.load(in);
+			
+		} catch (Exception e) {
+		} finally {
+			
 			Material materialInConfig = null;
 			
 			for (String configItem : ((String) prop.get("Pickaxes")).split(",")) {
@@ -139,15 +156,17 @@ public class AutoTool extends JavaPlugin {
 			
 			ALWAYSON = Boolean.parseBoolean(((String) prop.get("On-by-default?")).toLowerCase());
 			
-			in.close();
-			
-		} catch (Exception e) {
-			log.severe("[AutoTool] Loading error: " + e.getMessage());
+			try {
+				in.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
-	}
-
-	public void onDisable() {
 		
+	}
+	
+	public void onDisable() {
+	
 		ACTIVATED.clear();
 		pickaxes.clear();
 		shovels.clear();
@@ -158,10 +177,9 @@ public class AutoTool extends JavaPlugin {
 		log.info("[AutoTool] Closed and unloaded.");
 		
 	}
-
-
+	
 	public boolean stupConfig() {
-		
+	
 		try {
 			
 			CONFIG.createNewFile();
@@ -189,26 +207,32 @@ public class AutoTool extends JavaPlugin {
 	}
 	
 	public boolean isPickaxe(Block block) {
+	
 		return PICKAXE.contains(block.getType());
 	}
-
+	
 	public boolean isShovel(Block block) {
+	
 		return SHOVEL.contains(block.getType());
 	}
-
+	
 	public boolean isAxe(Block block) {
+	
 		return AXE.contains(block.getType());
 	}
-
+	
 	public ArrayList<Material> getAxes() {
+	
 		return axes;
 	}
-
+	
 	public ArrayList<Material> getPickaxes() {
+	
 		return pickaxes;
 	}
-
+	
 	public ArrayList<Material> getShovels() {
+	
 		return shovels;
 	}
 }
